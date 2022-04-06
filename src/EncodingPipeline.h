@@ -20,12 +20,11 @@ class EncodingPipeline final
     bool start() noexcept;
     void stop() noexcept;
 
-    GstPipeline* get_pipeline() noexcept
-    {
-        return m_pipeline;
-    }
-
   private:
+    static GstPadProbeReturn highq_stream_pad_probe(GstPad* pad, GstPadProbeInfo* info, EncodingPipeline* pipeline);
+    static GstPadProbeReturn lowq_stream_pad_probe(GstPad* pad, GstPadProbeInfo* info, EncodingPipeline* pipeline);
+
     bool create_pipeline() noexcept;
+    bool register_buffer_probes() noexcept;
     GstPipeline* m_pipeline = nullptr;
 };

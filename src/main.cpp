@@ -21,12 +21,20 @@ int main(int argc, char* argv[])
         return -1;
     }
 
+    EncodingPipeline pipeline;
+    if (!pipeline.start())
+    {
+        g_printerr("Cannot start encoding pipeline\n");
+        return -2;
+    }
+
     g_unix_signal_add(SIGINT, reinterpret_cast<GSourceFunc>(on_quit), &server);
     if (!server.start())
     {
         g_printerr("Cannot start streaming server\n");
-        return -2;
+        return -3;
     }
 
+    pipeline.stop();
     return 0;
 }
