@@ -22,7 +22,7 @@ int main(int argc, char* argv[])
     }
 
     EncodingPipeline pipeline;
-    if (!pipeline.start())
+    if (!pipeline.start(&server))
     {
         g_printerr("Cannot start encoding pipeline\n");
         return -2;

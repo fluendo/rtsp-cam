@@ -19,11 +19,12 @@ if("${CMAKE_PROJECT_NAME}" STREQUAL "${PROJECT_NAME}")
 endif()
 
 find_package(PkgConfig REQUIRED)
-pkg_check_modules(GStreamer REQUIRED IMPORTED_TARGET gstreamer-rtsp-server-1.0)
+pkg_check_modules(GStreamer REQUIRED IMPORTED_TARGET gstreamer-rtsp-server-1.0 gstreamer-app-1.0)
 
 add_executable(${PROJECT_NAME}
     src/EncodingPipeline.cpp
     src/EncodingPipeline.h
+    src/IStreamConsumer.h
     src/main.cpp
     src/StreamingServer.cpp
     src/StreamingServer.h)

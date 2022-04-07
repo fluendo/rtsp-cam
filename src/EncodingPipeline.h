@@ -1,6 +1,6 @@
 #pragma once
 
-#include <gst/gst.h>
+#include "IStreamConsumer.h"
 
 class EncodingPipeline final
 {
@@ -17,14 +17,12 @@ class EncodingPipeline final
         stop();
     }
 
-    bool start() noexcept;
+    bool start(IStreamConsumer* stream_consumer) noexcept;
     void stop() noexcept;
 
   private:
-    static GstPadProbeReturn highq_stream_pad_probe(GstPad* pad, GstPadProbeInfo* info, EncodingPipeline* pipeline);
-    static GstPadProbeReturn lowq_stream_pad_probe(GstPad* pad, GstPadProbeInfo* info, EncodingPipeline* pipeline);
-
     bool create_pipeline() noexcept;
-    bool register_buffer_probes() noexcept;
+    bool register_buffer_probes(IStreamConsumer* stream_consumer) noexcept;
+
     GstPipeline* m_pipeline = nullptr;
 };
