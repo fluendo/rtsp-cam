@@ -23,6 +23,7 @@ class EncodingPipeline final
   private:
     bool create_pipeline() noexcept;
     bool register_buffer_probes(IStreamConsumer* stream_consumer) noexcept;
+    void finish_grabbing() noexcept;
 
     GstPipeline* m_pipeline = nullptr;
 };

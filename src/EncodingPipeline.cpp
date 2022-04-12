@@ -6,6 +6,7 @@ namespace
 {
 constexpr unsigned int NB_STREAMS = 2;
 constexpr char STREAM_IDX_KEY[] = "stream-idx";
+constexpr GstClockTime EOS_PROPAGATION_TIMEOUT = 5 * GST_SECOND;
 
 GstPadProbeReturn stream_pad_probe(GstPad* pad, GstPadProbeInfo* info, IStreamConsumer* stream_consumer)
 {
@@ -103,6 +104,48 @@ bool EncodingPipeline::register_buffer_probes(IStreamConsumer* stream_consumer) 
     return true;
 }
 
+void EncodingPipeline::finish_grabbing() noexcept
+{
+    assert(m_pipeline != nullptr);
+
+    GstState state = GST_STATE_NULL;
+    GstStateChangeReturn ret = gst_element_get_state(GST_ELEMENT(m_pipeline), &state, nullptr, 0);
+    if ((ret != GST_STATE_CHANGE_SUCCESS) || (state != GST_STATE_PLAYING))
+    {
+        return;
+    }
+
+    g_print("Finishing grabbing...\n");
+
+    GstElement* tee = gst_bin_get_by_name(GST_BIN(m_pipeline), "raw-img");
+    assert(tee != nullptr);
+    GstPad* sink_pad = gst_element_get_static_pad(tee, "sink");
+    assert(sink_pad != nullptr);
+    gst_object_unref(tee);
+    gboolean event_sent = gst_pad_send_event(sink_pad, gst_event_new_eos());
+    gst_object_unref(sink_pad);
+
+    if (event_sent != TRUE)
+    {
+        g_printerr("WARNING: cannot send EOS event to the pipeline, grabbed video may be corrupted.\n");
+        return;
+    }
+
+    GstBus* bus = gst_pipeline_get_bus(m_pipeline);
+    assert(bus != nullptr);
+    GstMessage* eos_message = gst_bus_timed_pop_filtered(bus, EOS_PROPAGATION_TIMEOUT, GST_MESSAGE_EOS);
+    gst_object_unref(bus);
+
+    if (eos_message != nullptr)
+    {
+        gst_message_unref(eos_message);
+    }
+    else
+    {
+        g_printerr("WARNING: not receiving EOS message, grabbed video may be corrupted.\n");
+    }
+}
+
 bool EncodingPipeline::start(IStreamConsumer* stream_consumer) noexcept
 {
     if (m_pipeline != nullptr)
@@ -124,6 +167,12 @@ void EncodingPipeline::stop() noexcept
 {
     if (m_pipeline != nullptr)
     {
+        // When stopping the encoding pipeline, we must ensure that the grabbing branch
+        // has processed all the buffers, else the resulting file may be corrupted.
+        // To do so, we push an EOS event at the beginning of the branch and we wait for
+        // the event to reach the final filesink.
+        finish_grabbing();
+
         gst_element_set_state(GST_ELEMENT(m_pipeline), GST_STATE_NULL);
         gst_object_unref(m_pipeline);
         m_pipeline = nullptr;
