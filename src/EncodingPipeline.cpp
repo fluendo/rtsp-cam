@@ -37,7 +37,8 @@ bool EncodingPipeline::create_pipeline() noexcept
     // clang-format off
     GstElement* pipeline = gst_parse_launch(
         "v4l2src ! video/x-raw,width=640,height=480,framerate=30/1 ! videoconvert ! tee name=raw-img "
-        "raw-img. ! queue silent=true ! videoscale ! vaapih264enc bitrate=2048 cabac=true dct8x8=true keyframe-period=0 quality-level=2 rate-control=vbr ! video/x-h264,profile=high,stream-format=byte-stream ! h264parse ! qtmux ! filesink location=./out.mp4 "
+        "raw-img. ! queue silent=true ! fakesink name=frame-producer enable-last-sample=true "
+        "raw-img. ! queue silent=true ! videoscale ! vaapih264enc bitrate=2048 cabac=true dct8x8=true keyframe-period=0 quality-level=2 rate-control=vbr ! video/x-h264,profile=high,stream-format=byte-stream ! h264parse ! qtmux ! filesink enable-last-sample=false qos=true location=./out.mp4 "
         "raw-img. ! queue silent=true ! videoscale ! vaapih264enc bitrate=1024 cabac=true keyframe-period=0 quality-level=6 rate-control=vbr ! video/x-h264,profile=main,stream-format=byte-stream ! fakesink name=stream0 enable-last-sample=false qos=true sync=true "
         "raw-img. ! queue silent=true ! videoscale ! vaapih264enc bitrate=512 cabac=true keyframe-period=0 quality-level=7 rate-control=vbr ! video/x-h264,profile=main,stream-format=byte-stream,width=320,height=240 ! fakesink name=stream1 enable-last-sample=false qos=true sync=true",
         &error);
@@ -178,4 +179,21 @@ void EncodingPipeline::stop() noexcept
         m_pipeline = nullptr;
         g_print("Encoding pipeline stopped\n");
     }
+}
+
+GstSample* EncodingPipeline::get_last_sample() const noexcept
+{
+    if (m_pipeline == nullptr)
+    {
+        return nullptr;
+    }
+
+    GstElement* frame_producer = gst_bin_get_by_name(GST_BIN(m_pipeline), "frame-producer");
+    assert(frame_producer != nullptr);
+
+    GstSample* last_sample = nullptr;
+    g_object_get(frame_producer, "last-sample", &last_sample, nullptr);
+    gst_object_unref(frame_producer);
+
+    return last_sample;
 }

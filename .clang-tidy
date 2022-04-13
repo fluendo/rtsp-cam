@@ -17,6 +17,7 @@ Checks:
     -modernize-avoid-c-arrays,
     -modernize-use-trailing-return-type,
     -modernize-loop-convert,
+    -modernize-use-nodiscard,
     performance-*,
     -performance-no-int-to-ptr,
     portability-*,

@@ -1,8 +1,9 @@
 #pragma once
 
+#include "IFrameProducer.h"
 #include "IStreamConsumer.h"
 
-class EncodingPipeline final
+class EncodingPipeline final : public IFrameProducer
 {
   public:
     EncodingPipeline() = default;
@@ -12,13 +13,15 @@ class EncodingPipeline final
     EncodingPipeline(const EncodingPipeline&) = delete;
     EncodingPipeline& operator=(const EncodingPipeline&) = delete;
 
-    ~EncodingPipeline()
+    ~EncodingPipeline() override
     {
         stop();
     }
 
     bool start(IStreamConsumer* stream_consumer) noexcept;
     void stop() noexcept;
+
+    GstSample* get_last_sample() const noexcept override;
 
   private:
     bool create_pipeline() noexcept;

@@ -1,40 +1,39 @@
-#include "EncodingPipeline.h"
-#include "StreamingServer.h"
+#include "CameraManager.h"
 
 #include <glib-unix.h>
 
-static gboolean on_quit(StreamingServer* server)
+namespace
+{
+gboolean on_take_screenshot(CameraManager* manager)
+{
+    manager->take_screenshot();
+    return G_SOURCE_CONTINUE;
+}
+
+gboolean on_quit(CameraManager* manager)
 {
     g_print("\n");
-    server->stop();
+    manager->stop();
     return G_SOURCE_REMOVE;
 }
+} // namespace
 
 int main(int argc, char* argv[])
 {
     gst_init(&argc, &argv);
 
-    StreamingServer server;
-    if (!server.configure())
+    CameraManager manager;
+    if (!manager.configure())
     {
-        g_printerr("Cannot configure streaming server\n");
         return -1;
     }
 
-    EncodingPipeline pipeline;
-    if (!pipeline.start(&server))
+    g_unix_signal_add(SIGUSR1, reinterpret_cast<GSourceFunc>(on_take_screenshot), &manager);
+    g_unix_signal_add(SIGINT, reinterpret_cast<GSourceFunc>(on_quit), &manager);
+    if (!manager.start())
     {
-        g_printerr("Cannot start encoding pipeline\n");
         return -2;
     }
 
-    g_unix_signal_add(SIGINT, reinterpret_cast<GSourceFunc>(on_quit), &server);
-    if (!server.start())
-    {
-        g_printerr("Cannot start streaming server\n");
-        return -3;
-    }
-
-    pipeline.stop();
     return 0;
 }
