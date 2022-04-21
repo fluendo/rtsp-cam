@@ -181,6 +181,12 @@ void StreamingServer::stop() noexcept
     }
 }
 
+bool StreamingServer::push_caps(unsigned int /*stream_idx*/, GstCaps* /*caps*/) noexcept
+{
+    // Nothing to do here as we already know the caps
+    return true;
+}
+
 bool StreamingServer::push_buffer(unsigned int stream_idx, GstBuffer* buffer) noexcept
 {
     if (buffer == nullptr)

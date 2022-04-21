@@ -24,6 +24,7 @@ class StreamingServer final : public IStreamConsumer
     bool start() noexcept;
     void stop() noexcept;
 
+    bool push_caps(unsigned int stream_idx, GstCaps* caps) noexcept override;
     bool push_buffer(unsigned int stream_idx, GstBuffer* buffer) noexcept override;
 
   private:

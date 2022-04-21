@@ -13,5 +13,6 @@ class IStreamConsumer
 
     virtual ~IStreamConsumer() = default;
 
+    virtual bool push_caps(unsigned int stream_idx, GstCaps* caps) noexcept = 0;
     virtual bool push_buffer(unsigned int stream_idx, GstBuffer* buffer) noexcept = 0;
 };

@@ -18,15 +18,15 @@ class EncodingPipeline final : public IFrameProducer
         stop();
     }
 
-    bool start(IStreamConsumer* stream_consumer) noexcept;
+    bool start(IStreamConsumer& encoded_stream_consumer, IStreamConsumer& raw_stream_consumer) noexcept;
     void stop() noexcept;
 
     GstSample* get_last_sample() const noexcept override;
 
   private:
     bool create_pipeline() noexcept;
-    bool register_buffer_probes(IStreamConsumer* stream_consumer) noexcept;
-    void finish_grabbing() noexcept;
+    bool register_buffer_probes(IStreamConsumer& encoded_stream_consumer,
+                                IStreamConsumer& raw_stream_consumer) noexcept;
 
     GstPipeline* m_pipeline = nullptr;
 };

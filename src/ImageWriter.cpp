@@ -99,7 +99,7 @@ bool ImageWriter::take_screenshot(const IFrameProducer& producer) noexcept
 
     if (ret != GST_FLOW_OK)
     {
-        g_printerr("WARNING: cannot push the raw frame to the image encoder.\n");
+        g_printerr("WARNING: cannot push the raw frame to the image encoder\n");
         return false;
     }
 
@@ -112,7 +112,7 @@ bool ImageWriter::take_screenshot(const IFrameProducer& producer) noexcept
         if (msg == nullptr)
         {
             gst_object_unref(bus);
-            g_printerr("WARNING: cannot write image file (timeout occurred).\n");
+            g_printerr("WARNING: cannot write image file (timeout occurred)\n");
             return false;
         }
 

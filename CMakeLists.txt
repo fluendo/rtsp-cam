@@ -32,7 +32,9 @@ add_executable(${PROJECT_NAME}
     src/IStreamConsumer.h
     src/main.cpp
     src/StreamingServer.cpp
-    src/StreamingServer.h)
+    src/StreamingServer.h
+    src/StreamRecorder.cpp
+    src/StreamRecorder.h)
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
 target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Werror)
 target_link_libraries(${PROJECT_NAME} PRIVATE PkgConfig::GStreamer)
