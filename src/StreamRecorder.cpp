@@ -15,9 +15,9 @@ bool StreamRecorder::create_pipeline() noexcept
 
     GError* error = nullptr;
     GstElement* pipeline = gst_parse_launch(
-        "appsrc name=entry-point is-live=true do-timestamp=true emit-signals=false format=time leaky-type=downstream "
-        "max-buffers=5 ! videoconvert ! vaapih264enc bitrate=2048 cabac=true dct8x8=true keyframe-period=0 "
-        "quality-level=2 rate-control=vbr ! video/x-h264,profile=high,stream-format=byte-stream ! h264parse ! qtmux ! "
+        "appsrc name=entry-point is-live=true do-timestamp=true emit-signals=false format=time "
+        "! nvvidconv ! omxh264enc control-rate=1 bitrate=30000000 peak-bitrate=52000000 "
+        "! video/x-h264,stream-format=byte-stream ! h264parse ! qtmux ! "
         "filesink name=file-output enable-last-sample=false qos=true",
         &error);
 

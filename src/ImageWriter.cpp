@@ -11,7 +11,7 @@ bool ImageWriter::create_pipeline() noexcept
 
     GError* error = nullptr;
     GstElement* pipeline = gst_parse_launch(
-        "appsrc name=entry-point is-live=true emit-signals=false format=time ! videoconvert ! vaapijpegenc ! "
+        "appsrc name=entry-point is-live=true emit-signals=false format=time ! nvvidconv ! nvjpegenc quality=100 ! "
         "multifilesink enable-last-sample=false post-messages=true location=./screenshot_%03d.jpg",
         &error);
 

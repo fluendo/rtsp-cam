@@ -7,7 +7,7 @@ namespace
 {
 constexpr char DEFAULT_RTSP_PORT[] = "8554";
 constexpr char MEDIA_FACTORY_BIN_DESC[] =
-    "( appsrc name=entry-point is-live=true do-timestamp=true caps=\"video/x-h264,framerate=30/1\" emit-signals=false "
+    "( appsrc name=entry-point is-live=true do-timestamp=true caps=\"video/x-h264,framerate=30/1,stream-format=byte-stream\" emit-signals=false "
     "format=time ! h264parse ! rtph264pay name=pay0 pt=96 )";
 constexpr char MEDIA_IDX_KEY[] = "media-idx";
 constexpr guint SESSIONS_CLEANUP_TIMEOUT_IN_SECONDS = 5;
