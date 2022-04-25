@@ -79,7 +79,7 @@ bool EncodingPipeline::create_pipeline() noexcept
     GError* error = nullptr;
     // clang-format off
     GstElement* pipeline = gst_parse_launch(
-        "nvarguscamerasrc ! video/x-raw(memory:NVMM),format=(string)NV12,width=3840,height=2160,framerate=30/1 ! nvvidconv ! video/x-raw(memory:NVMM),format=(string)I420 ! tee name=raw-img "
+        "nvarguscamerasrc ! video/x-raw(memory:NVMM),format=(string)NV12,width=3840,height=2160,framerate=30/1 ! tee name=raw-img "
         "raw-img. ! queue silent=true ! fakesink name=frame-producer enable-last-sample=true sync=true "
         "raw-img. ! queue silent=true ! nvvidconv ! omxh264enc control-rate=3 bitrate=4000000 peak-bitrate=8000000 ! video/x-h264,stream-format=byte-stream,width=1280,height=720 ! fakesink name=stream0 enable-last-sample=false qos=true sync=true "
         "raw-img. ! queue silent=true ! nvvidconv ! omxh264enc control-rate=3 bitrate=4000000 peak-bitrate=8000000 ! video/x-h264,stream-format=byte-stream,width=1280,height=720 ! fakesink name=stream1 enable-last-sample=false qos=true sync=true",
