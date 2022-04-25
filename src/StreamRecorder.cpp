@@ -173,10 +173,7 @@ bool StreamRecorder::start_recording() noexcept
     }
 
     ++m_video_idx;
-
-    gchar* absolute_path = g_canonicalize_filename(filename, nullptr);
-    g_print("Start recording video to %s\n", absolute_path);
-    g_free(absolute_path);
+    g_print("Start recording video to %s\n", filename);
 
     return true;
 }

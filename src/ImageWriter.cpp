@@ -120,9 +120,7 @@ bool ImageWriter::take_screenshot(const IFrameProducer& producer) noexcept
         if (g_strcmp0(gst_structure_get_name(msg_struct), "GstMultiFileSink") == 0)
         {
             const gchar* filename = gst_structure_get_string(msg_struct, "filename");
-            gchar* absolute_path = g_canonicalize_filename(filename, nullptr);
-            g_print("Screenshot written to %s\n", absolute_path);
-            g_free(absolute_path);
+            g_print("Screenshot written to %s\n", filename);
 
             gst_message_unref(msg);
             gst_object_unref(bus);
