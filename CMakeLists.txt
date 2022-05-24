@@ -21,6 +21,11 @@ endif()
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(GStreamer REQUIRED IMPORTED_TARGET gstreamer-rtsp-server-1.0 gstreamer-app-1.0)
 
+if(DEFINED ENV{SDKTARGETSYSROOT})
+  message(VERBOSE "Detected cross-compile SDK, fixing glib-2.0 include path")
+  include_directories($ENV{SDKTARGETSYSROOT}/usr/lib/glib-2.0/include/)
+endif()
+
 add_executable(${PROJECT_NAME}
     src/CameraManager.cpp
     src/CameraManager.h
@@ -36,8 +41,10 @@ add_executable(${PROJECT_NAME}
     src/StreamRecorder.cpp
     src/StreamRecorder.h)
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
-target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Werror)
-target_link_libraries(${PROJECT_NAME} PRIVATE PkgConfig::GStreamer)
+target_compile_options(${PROJECT_NAME} PRIVATE -Wall)
+target_include_directories(
+  ${PROJECT_NAME} PUBLIC ${GStreamer_INCLUDE_DIRS})
+target_link_libraries(${PROJECT_NAME} PRIVATE ${GStreamer_LIBRARIES})
 
 if(USE_CODE_TIDY)
     find_program(CLANG_TIDY_EXE
