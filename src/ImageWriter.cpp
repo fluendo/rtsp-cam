@@ -11,8 +11,23 @@ bool ImageWriter::create_pipeline() noexcept
 
     GError* error = nullptr;
     GstElement* pipeline = gst_parse_launch(
-        "appsrc name=entry-point is-live=true emit-signals=false format=time ! videoconvert ! vaapijpegenc ! "
-        "multifilesink enable-last-sample=false post-messages=true location=./screenshot_%03d.jpg",
+        "appsrc"
+            " name=entry-point"
+            " is-live=true"
+            " emit-signals=false"
+            " leaky-type=downstream"
+            " max-buffers=1"
+            " format=time"
+        " ! videoconvert"
+        " ! jpegenc"
+        " ! queue"
+            " max-size-buffers=10"
+        //" ! identity"
+        //    " sleep-time=5000000"
+        " ! multifilesink"
+            " enable-last-sample=false"
+            " post-messages=true"
+            " location=./screenshot_%03d.jpg",
         &error);
 
     if (pipeline == nullptr)
@@ -40,6 +55,22 @@ bool ImageWriter::create_pipeline() noexcept
     return true;
 }
 
+gboolean ImageWriter::bus_cb(GstBus *bus, GstMessage *message, gpointer thiz)
+{
+  const GstStructure* msg_struct = gst_message_get_structure(message);
+  if (!msg_struct || (g_strcmp0(gst_structure_get_name(msg_struct), "GstMultiFileSink") != 0))
+  {
+    return true;
+  }
+
+  const gchar* filename = gst_structure_get_string(msg_struct, "filename");
+  gchar* absolute_path = g_canonicalize_filename(filename, nullptr);
+  g_print("Screenshot written to %s\n", absolute_path);
+  g_free(absolute_path);
+
+  return true;
+}
+
 bool ImageWriter::start() noexcept
 {
     if (m_pipeline != nullptr)
@@ -51,6 +82,11 @@ bool ImageWriter::start() noexcept
     {
         return false;
     }
+
+    GstBus* bus = gst_pipeline_get_bus(m_pipeline);
+    assert(bus != nullptr);
+    gst_bus_add_watch(bus, bus_cb, this);
+    gst_object_unref(bus);
 
     gst_element_set_state(GST_ELEMENT(m_pipeline), GST_STATE_PLAYING);
     g_print("Image writer pipeline started\n");
@@ -70,6 +106,7 @@ void ImageWriter::stop() noexcept
 
 bool ImageWriter::take_screenshot(const IFrameProducer& producer) noexcept
 {
+    g_print("taking screenshot...\n");
     if (m_pipeline == nullptr)
     {
         return false;
@@ -103,32 +140,5 @@ bool ImageWriter::take_screenshot(const IFrameProducer& producer) noexcept
         return false;
     }
 
-    GstBus* bus = gst_pipeline_get_bus(m_pipeline);
-    assert(bus != nullptr);
-
-    for (;;)
-    {
-        GstMessage* msg = gst_bus_timed_pop_filtered(bus, MESSAGE_TIMEOUT, GST_MESSAGE_ELEMENT);
-        if (msg == nullptr)
-        {
-            gst_object_unref(bus);
-            g_printerr("WARNING: cannot write image file (timeout occurred)\n");
-            return false;
-        }
-
-        const GstStructure* msg_struct = gst_message_get_structure(msg);
-        if (g_strcmp0(gst_structure_get_name(msg_struct), "GstMultiFileSink") == 0)
-        {
-            const gchar* filename = gst_structure_get_string(msg_struct, "filename");
-            gchar* absolute_path = g_canonicalize_filename(filename, nullptr);
-            g_print("Screenshot written to %s\n", absolute_path);
-            g_free(absolute_path);
-
-            gst_message_unref(msg);
-            gst_object_unref(bus);
-            return true;
-        }
-
-        gst_message_unref(msg);
-    }
+    return true;
 }

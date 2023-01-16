@@ -24,6 +24,7 @@ class ImageWriter final
 
   private:
     bool create_pipeline() noexcept;
+    static gboolean bus_cb(GstBus *bus, GstMessage *message, gpointer thiz);
 
     GstPipeline* m_pipeline = nullptr;
 };
