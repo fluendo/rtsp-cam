@@ -16,10 +16,7 @@ bool StreamRecorder::create_pipeline() noexcept
     GError* error = nullptr;
     GstElement* pipeline =
         gst_parse_launch("appsrc name=entry-point is-live=true do-timestamp=true emit-signals=false format=time "
-                         "leaky-type=downstream max-buffers=5 "
-                         "! nvvidconv ! omxh264enc control-rate=1 bitrate=30000000 peak-bitrate=52000000 "
-                         "! video/x-h264,stream-format=byte-stream ! h264parse ! qtmux ! "
-                         "filesink name=file-output enable-last-sample=false qos=true",
+                         "! nvvidconv ! timeoverlay halignment=right ! pngenc ! multifilesink name=file-output enable-last-sample=false qos=true",
                          &error);
 
     if (pipeline == nullptr)
@@ -133,8 +130,8 @@ bool StreamRecorder::start_recording() noexcept
     }
 
     // Set output filename for the recorded video
-    char filename[16]; // until "./video_999.mp4", just in case // NOLINT
-    g_snprintf(filename, sizeof(filename), "./video_%03u.mp4", m_video_idx);
+    char filename[] = "frames/frame_%04d.png"; // until "./video_999.mp4", just in case // NOLINT
+    //g_snprintf(filename, sizeof(filename), "./video_%03u.mp4", m_video_idx);
 
     GstElement* sink = gst_bin_get_by_name(GST_BIN(m_pipeline), "file-output");
     assert(sink != nullptr);

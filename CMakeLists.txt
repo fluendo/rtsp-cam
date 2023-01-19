@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.10)
 
 if(EXISTS "${CMAKE_CURRENT_BINARY_DIR}/CMakeLists.txt")
     message(FATAL_ERROR
@@ -7,7 +7,7 @@ if(EXISTS "${CMAKE_CURRENT_BINARY_DIR}/CMakeLists.txt")
         "You must delete them, or cmake will refuse to work.")
 endif()
 
-option(USE_CODE_TIDY "Use code static analysis on build" ON)
+option(USE_CODE_TIDY "Use code static analysis on build" OFF)
 
 project(rtsp-cam
     VERSION 1.0.0
