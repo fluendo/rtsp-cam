@@ -15,10 +15,9 @@ bool StreamRecorder::create_pipeline() noexcept
 
     GError* error = nullptr;
     GstElement* pipeline = gst_parse_launch(
-        "appsrc name=entry-point is-live=true do-timestamp=true emit-signals=false format=time leaky-type=downstream "
-        "max-buffers=5 ! videoconvert ! vaapih264enc bitrate=2048 cabac=true dct8x8=true keyframe-period=0 "
-        "quality-level=2 rate-control=vbr ! video/x-h264,profile=high,stream-format=byte-stream ! h264parse ! qtmux ! "
-        "filesink name=file-output enable-last-sample=false qos=true",
+        "appsrc name=entry-point is-live=true do-timestamp=true emit-signals=false format=time "
+	"! timeoverlay halignment=right ! videoconvert ! pngenc"
+        "! multifilesink name=file-output enable-last-sample=false qos=true location=frames/frames_%02d.png",
         &error);
 
     if (pipeline == nullptr)
@@ -131,15 +130,6 @@ bool StreamRecorder::start_recording() noexcept
         return true;
     }
 
-    // Set output filename for the recorded video
-    char filename[16]; // until "./video_999.mp4", just in case // NOLINT
-    g_snprintf(filename, sizeof(filename), "./video_%03u.mp4", m_video_idx);
-
-    GstElement* sink = gst_bin_get_by_name(GST_BIN(m_pipeline), "file-output");
-    assert(sink != nullptr);
-    g_object_set(sink, "location", filename, nullptr);
-    gst_object_unref(sink);
-
     // Start recording pipeline
     if (gst_element_set_state(GST_ELEMENT(m_pipeline), GST_STATE_READY) != GST_STATE_CHANGE_SUCCESS)
     {
@@ -171,12 +161,6 @@ bool StreamRecorder::start_recording() noexcept
         g_printerr("ERROR: cannot change stream recorder pipeline to PLAYING state\n");
         return false;
     }
-
-    ++m_video_idx;
-
-    gchar* absolute_path = g_canonicalize_filename(filename, nullptr);
-    g_print("Start recording video to %s\n", absolute_path);
-    g_free(absolute_path);
 
     return true;
 }

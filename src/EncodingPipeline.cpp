@@ -79,10 +79,10 @@ bool EncodingPipeline::create_pipeline() noexcept
     GError* error = nullptr;
     // clang-format off
     GstElement* pipeline = gst_parse_launch(
-        "v4l2src ! video/x-raw,width=640,height=480,framerate=30/1 ! videoconvert ! tee name=raw-img "
+        "videotestsrc pattern=ball ! video/x-raw,width=1920,height=1080 ! timeoverlay ! tee name=raw-img "
         "raw-img. ! queue silent=true ! fakesink name=frame-producer enable-last-sample=true sync=true "
-        "raw-img. ! queue silent=true ! videoscale ! vaapih264enc bitrate=1024 cabac=true keyframe-period=0 quality-level=6 rate-control=vbr ! video/x-h264,profile=main,stream-format=byte-stream ! fakesink name=stream0 enable-last-sample=false qos=true sync=true "
-        "raw-img. ! queue silent=true ! videoscale ! vaapih264enc bitrate=512 cabac=true keyframe-period=0 quality-level=7 rate-control=vbr ! video/x-h264,profile=main,stream-format=byte-stream,width=320,height=240 ! fakesink name=stream1 enable-last-sample=false qos=true sync=true",
+        "raw-img. ! queue silent=true  ! fakesink name=stream0 enable-last-sample=false qos=true sync=true "
+        "raw-img. ! queue silent=true  ! fakesink name=stream1 enable-last-sample=false qos=true sync=true",
         &error);
     // clang-format on
 
