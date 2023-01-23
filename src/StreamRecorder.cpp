@@ -15,9 +15,13 @@ bool StreamRecorder::create_pipeline() noexcept
 
     GError* error = nullptr;
     GstElement* pipeline = gst_parse_launch(
-        "appsrc name=entry-point is-live=true do-timestamp=true emit-signals=false format=time "
-	"! timeoverlay halignment=right ! videoconvert ! pngenc"
-        "! multifilesink name=file-output enable-last-sample=false qos=true location=frames/frames_%02d.png",
+        "appsrc name=entry-point is-live=true do-timestamp=true emit-signals=false format=time max-buffers=0 max-bytes=0 "
+        " ! queue max-size-buffers=40 max-size-bytes=0 max-size-time=0"
+        " ! timeoverlay halignment=right"
+        " ! videoconvert"
+        " ! pngenc"
+        " ! fakesink name=file-output enable-last-sample=false qos=true",
+        //" ! multifilesink name=file-output enable-last-sample=false qos=true location=frames/frames_%02d.png",
         &error);
 
     if (pipeline == nullptr)
