@@ -247,6 +247,10 @@ bool StreamRecorder::push_buffer(unsigned int /*stream_idx*/, GstBuffer* buffer)
         return false;
     }
 
+    guint64 queue_level = 0;
+    g_object_get(m_appsrc, "current-level-bytes", &queue_level, nullptr);
+    GST_DEBUG("rec queue level: %lu bytes", queue_level);
+
     // Invalidate buffer pts and dts to enable appsrc retimestamping
     // on current running-time (do-timestamp=true).
     // We can directly retimestamp all incoming buffers on pipeline
