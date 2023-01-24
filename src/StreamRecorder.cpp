@@ -15,8 +15,13 @@ bool StreamRecorder::create_pipeline() noexcept
 
     GError* error = nullptr;
     GstElement* pipeline =
-        gst_parse_launch("appsrc name=entry-point is-live=true do-timestamp=true emit-signals=false format=time "
-                         "! nvvidconv ! timeoverlay halignment=right ! pngenc ! multifilesink name=file-output enable-last-sample=false qos=true",
+        gst_parse_launch("appsrc name=entry-point is-live=true do-timestamp=true emit-signals=false format=time max-bytes=0 block=true "
+                         " ! identity name=rec_identity silent=false "
+                         " ! nvvidconv "
+                         " ! timeoverlay halignment=right "
+                         " ! pngenc "
+                         " ! queue name=rec_queue max-size-bytes=0 max-size-buffers=10 max-size-time=0 "
+                         " ! multifilesink name=file-output enable-last-sample=false qos=true",
                          &error);
 
     if (pipeline == nullptr)
@@ -241,6 +246,10 @@ bool StreamRecorder::push_buffer(unsigned int /*stream_idx*/, GstBuffer* buffer)
     {
         return false;
     }
+
+    guint64 queue_level = 0;
+    g_object_get(m_appsrc, "current-level-bytes", &queue_level, nullptr);
+    GST_DEBUG("rec queue level: %lu bytes", queue_level);
 
     // Invalidate buffer pts and dts to enable appsrc retimestamping
     // on current running-time (do-timestamp=true).
