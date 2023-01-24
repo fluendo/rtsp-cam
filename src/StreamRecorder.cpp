@@ -17,6 +17,7 @@ bool StreamRecorder::create_pipeline() noexcept
     GstElement* pipeline =
         gst_parse_launch("appsrc name=entry-point is-live=true do-timestamp=true emit-signals=false format=time "
                          "leaky-type=downstream max-buffers=5 "
+                         "! identity name=sink_identity silent=false "
                          "! nvvidconv ! omxh264enc control-rate=1 bitrate=30000000 peak-bitrate=52000000 "
                          "! video/x-h264,stream-format=byte-stream ! h264parse ! qtmux ! "
                          "filesink name=file-output enable-last-sample=false qos=true",
