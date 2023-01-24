@@ -7,7 +7,7 @@ namespace
 {
 constexpr char DEFAULT_RTSP_PORT[] = "8554";
 constexpr char MEDIA_FACTORY_BIN_DESC[] =
-    "( appsrc name=entry-point is-live=true do-timestamp=true caps=\"video/x-h264,framerate=30/1,stream-format=byte-stream\" emit-signals=false "
+    "( appsrc name=appsrc_streaming is-live=true do-timestamp=true caps=\"video/x-h264,framerate=30/1,stream-format=byte-stream\" emit-signals=false "
     "format=time ! h264parse ! rtph264pay name=pay0 pt=96 )";
 constexpr char MEDIA_IDX_KEY[] = "media-idx";
 constexpr guint SESSIONS_CLEANUP_TIMEOUT_IN_SECONDS = 5;
@@ -38,7 +38,7 @@ void StreamingServer::on_media_configure(GstRTSPMediaFactory* factory, GstRTSPMe
 
     GstElement* media_bin = gst_rtsp_media_get_element(media);
     assert(media_bin != nullptr);
-    GstElement* entry_point = gst_bin_get_by_name(GST_BIN(media_bin), "entry-point");
+    GstElement* entry_point = gst_bin_get_by_name(GST_BIN(media_bin), "appsrc_streaming");
     assert(entry_point != nullptr);
     gst_object_unref(media_bin);
 

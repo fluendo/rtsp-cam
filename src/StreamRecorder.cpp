@@ -15,7 +15,7 @@ bool StreamRecorder::create_pipeline() noexcept
 
     GError* error = nullptr;
     GstElement* pipeline =
-        gst_parse_launch("appsrc name=entry-point is-live=true do-timestamp=true emit-signals=false format=time "
+        gst_parse_launch("appsrc name=appsrc_rec is-live=true do-timestamp=true emit-signals=false format=time "
                          "leaky-type=downstream max-buffers=5 "
                          "! identity name=sink_identity silent=false "
                          "! nvvidconv ! omxh264enc control-rate=1 bitrate=30000000 peak-bitrate=52000000 "
@@ -97,7 +97,7 @@ bool StreamRecorder::init() noexcept
         return false;
     }
 
-    m_appsrc = gst_bin_get_by_name(GST_BIN(m_pipeline), "entry-point");
+    m_appsrc = gst_bin_get_by_name(GST_BIN(m_pipeline), "appsrc_rec");
     assert(m_appsrc != nullptr);
 
     g_print("Stream recorder configured\n");

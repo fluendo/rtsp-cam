@@ -11,7 +11,7 @@ bool ImageWriter::create_pipeline() noexcept
 
     GError* error = nullptr;
     GstElement* pipeline = gst_parse_launch(
-        "appsrc name=entry-point is-live=true emit-signals=false format=time ! nvvidconv ! video/x-raw(memory:NVMM),format=I420 ! nvjpegenc quality=100 ! "
+        "appsrc name=appsrc_img is-live=true emit-signals=false format=time ! nvvidconv ! video/x-raw(memory:NVMM),format=I420 ! nvjpegenc quality=100 ! "
         "multifilesink enable-last-sample=false post-messages=true location=./screenshot_%03d.jpg",
         &error);
 
@@ -89,7 +89,7 @@ bool ImageWriter::take_screenshot(const IFrameProducer& producer) noexcept
         return false;
     }
 
-    GstElement* appsrc = gst_bin_get_by_name(GST_BIN(m_pipeline), "entry-point");
+    GstElement* appsrc = gst_bin_get_by_name(GST_BIN(m_pipeline), "appsrc_img");
     assert(appsrc != nullptr);
 
     g_object_set(appsrc, "caps", sample_caps, nullptr);
