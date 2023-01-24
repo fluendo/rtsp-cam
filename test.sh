@@ -51,9 +51,8 @@ test_recording() {
 
 plot_appsrc_queue() {
 	grep 'Currently queued' "${gstlog_file}" \
-	| grep -o '[0-9]* buffers' \
-	| cut -d' ' -f 1 \
-	| gnuplot -p -e "plot '-' with linespoint"
+	| sed -e 's/^\([0-9:.]*\).*, \([0-9]*\) buffers,.*$/\1 \2/' \
+	| gnuplot -p -e "set xdata time; set timefmt '%H:%M:%S'; set autoscale; plot '-' using 1:2 with linespoint"
 }
 
 start_rtsp_cam
