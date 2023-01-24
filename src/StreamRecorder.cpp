@@ -20,6 +20,7 @@ bool StreamRecorder::create_pipeline() noexcept
                          "! identity name=sink_identity silent=false "
                          "! nvvidconv ! omxh264enc control-rate=1 bitrate=30000000 peak-bitrate=52000000 "
                          "! video/x-h264,stream-format=byte-stream ! h264parse ! qtmux ! "
+                         "! queue max-size-bytes=0 max-size-time=0 max-size-buffers=10 "
                          "filesink name=file-output enable-last-sample=false qos=true",
                          &error);
 
