@@ -15,8 +15,8 @@ bool StreamRecorder::create_pipeline() noexcept
 
     GError* error = nullptr;
     GstElement* pipeline =
-        gst_parse_launch("appsrc name=appsrc_rec is-live=true do-timestamp=true emit-signals=false format=time "
-                         "leaky-type=downstream max-buffers=5 max-bytes=0 "
+        gst_parse_launch("appsrc name=appsrc_rec is-live=true do-timestamp=false emit-signals=false format=time "
+                         "leaky-type=downstream max-buffers=5 max-bytes=0 block=true "
                          "! identity name=sink_identity silent=false "
                          "! nvvidconv ! omxh264enc control-rate=1 bitrate=30000000 peak-bitrate=52000000 "
                          "! video/x-h264,stream-format=byte-stream ! h264parse ! qtmux ! "
@@ -257,8 +257,6 @@ bool StreamRecorder::push_buffer(unsigned int /*stream_idx*/, GstBuffer* buffer)
     // running-time because they are pushed synchronously to the recording
     // pipeline (sync=true in EncodingPipeline "frame-producer" fakesink).
     buffer = gst_buffer_copy(buffer);
-    GST_BUFFER_PTS(buffer) = GST_CLOCK_TIME_NONE;
-    GST_BUFFER_DTS(buffer) = GST_CLOCK_TIME_NONE;
 
     GstFlowReturn ret = gst_app_src_push_buffer(GST_APP_SRC(m_appsrc), buffer);
     return (ret == GST_FLOW_OK);
