@@ -15,7 +15,7 @@ bool StreamRecorder::create_pipeline() noexcept
 
     GError* error = nullptr;
     GstElement* pipeline =
-        gst_parse_launch("appsrc name=entry-point is-live=true do-timestamp=true emit-signals=false format=time max-bytes=0 block=true "
+        gst_parse_launch("appsrc name=entry-point is-live=true do-timestamp=false emit-signals=false format=time max-bytes=0 block=true "
                          " ! identity name=rec_identity silent=false "
                          " ! nvvidconv "
                          " ! timeoverlay halignment=right "
@@ -257,8 +257,6 @@ bool StreamRecorder::push_buffer(unsigned int /*stream_idx*/, GstBuffer* buffer)
     // running-time because they are pushed synchronously to the recording
     // pipeline (sync=true in EncodingPipeline "frame-producer" fakesink).
     buffer = gst_buffer_copy(buffer);
-    GST_BUFFER_PTS(buffer) = GST_CLOCK_TIME_NONE;
-    GST_BUFFER_DTS(buffer) = GST_CLOCK_TIME_NONE;
 
     GstFlowReturn ret = gst_app_src_push_buffer(GST_APP_SRC(m_appsrc), buffer);
     return (ret == GST_FLOW_OK);
