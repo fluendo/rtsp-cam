@@ -256,7 +256,7 @@ bool StreamRecorder::push_buffer(unsigned int /*stream_idx*/, GstBuffer* buffer)
     // We can directly retimestamp all incoming buffers on pipeline
     // running-time because they are pushed synchronously to the recording
     // pipeline (sync=true in EncodingPipeline "frame-producer" fakesink).
-    buffer = gst_buffer_copy(buffer);
+    buffer = gst_buffer_ref(buffer);
 
     GstFlowReturn ret = gst_app_src_push_buffer(GST_APP_SRC(m_appsrc), buffer);
     return (ret == GST_FLOW_OK);
