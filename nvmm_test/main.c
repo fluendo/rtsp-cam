@@ -67,6 +67,8 @@ int main(int argc, char *argv[])
 			" name=src"
 			" is-live=true"
 			" max-bytes=0"
+			" max-buffers=2"
+			" leaky-type=downstream"
 			" block=true"
 		" ! identity name=cons_identity sleep-time=5000"
 #ifdef USE_NVVIDCONV
@@ -119,7 +121,7 @@ static GstPadProbeReturn probe_cb(GstPad *pad, GstPadProbeInfo *info, void *udat
 	assert(consumer_src);
 
 	if (is_buffer) {
-		buffer = gst_buffer_copy(info->data);
+		buffer = gst_buffer_ref(info->data);
 		gst_app_src_push_buffer(consumer_src, buffer);
 
 		static int i = 0;
